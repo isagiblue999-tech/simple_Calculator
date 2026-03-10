@@ -1,0 +1,374 @@
+:root {
+    --bg-color: #f2f2f7;
+    --calc-bg: rgba(255, 255, 255, 0.85);
+    --btn-bg: #ffffff;
+    --btn-bg-hover: #e5e5ea;
+    --btn-bg-active: #d1d1d6;
+    --text-main: #1c1c1e;
+    --text-muted: #8e8e93;
+    --accent: #007aff;
+    --accent-hover: #0066d6;
+    --op-bg: #f2a33c;
+    --op-bg-hover: #e0902c;
+    --shadow-soft: 0 20px 40px rgba(0, 0, 0, 0.08);
+    --shadow-inner: inset 0 2px 4px rgba(255, 255, 255, 0.5);
+    --border-radius: 24px;
+    --transition-speed: 0.3s;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #000000;
+        --calc-bg: rgba(28, 28, 30, 0.85);
+        --btn-bg: #2c2c2e;
+        --btn-bg-hover: #3a3a3c;
+        --btn-bg-active: #48484a;
+        --text-main: #ffffff;
+        --text-muted: #ebebf599;
+        --accent: #0a84ff;
+        --shadow-soft: 0 20px 40px rgba(0, 0, 0, 0.5);
+        --shadow-inner: inset 0 2px 4px rgba(255, 255, 255, 0.05);
+    }
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Fallback */
+    height: 100dvh; /* Perfectly locks to mobile screen ignoring URL bar */
+    overflow: hidden;
+}
+
+#app-container {
+    width: 100%;
+    max-width: 420px;
+    height: 100vh;
+    height: 100dvh; 
+    max-height: 850px;
+    position: relative;
+    background: var(--calc-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+@media (min-width: 481px) {
+    #app-container {
+        height: 90vh;
+        border-radius: var(--border-radius);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* ==================== MODULE: PRIMARY (CALC) ==================== */
+
+#module-primary {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    transition: opacity var(--transition-speed) ease, transform var(--transition-speed) ease;
+}
+
+.calc-display-container {
+    flex: 1; /* Takes up only the remaining top space */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 24px 20px;
+    text-align: right;
+    word-break: break-all;
+    min-height: 120px; /* Ensures display never gets too squished */
+}
+
+.calc-history {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    min-height: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.calc-display {
+    font-size: 4rem;
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.calc-display::-webkit-scrollbar { display: none; }
+
+.calc-keypad {
+    flex: none; /* Stops keypad from auto-resizing. Forces fixed pixel heights */
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-auto-rows: 56px; /* STRICT FIXED HEIGHT FOR BUTTONS */
+    gap: 8px;
+    padding: 16px;
+    padding-bottom: max(20px, env(safe-area-inset-bottom)); /* Safely handles bottom nav bar */
+    background: rgba(0,0,0,0.02);
+    border-top: 1px solid rgba(128,128,128,0.1);
+}
+
+.btn {
+    border: none;
+    background: var(--btn-bg);
+    color: var(--text-main);
+    font-size: 1.1rem;
+    border-radius: 12px;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    box-shadow: var(--shadow-inner), 0 2px 5px rgba(0,0,0,0.04);
+    transition: background 0.15s ease, transform 0.1s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 500;
+}
+
+.btn:active {
+    background: var(--btn-bg-active);
+    transform: scale(0.95);
+}
+
+.num-btn { font-size: 1.5rem; }
+.fn-btn { font-size: 1rem; color: var(--text-muted); }
+.empty { background: transparent; box-shadow: none; pointer-events: none; }
+
+.action-btn { color: var(--accent); }
+.op-btn { background: var(--op-bg); color: #fff; font-size: 1.5rem; }
+.op-btn:active { background: var(--op-bg-hover); }
+.equals-btn { background: var(--accent); color: #fff; font-size: 1.5rem; }
+.equals-btn:active { background: var(--accent-hover); }
+
+/* ==================== MODULE: SECONDARY (SYSTEM) ==================== */
+
+#module-secondary {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--bg-color);
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    border-radius: inherit;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.98);
+    transition: opacity var(--transition-speed) ease, transform var(--transition-speed) ease;
+}
+
+#module-secondary.active-sys {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+}
+
+.sys-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: var(--calc-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(128,128,128,0.1);
+    z-index: 2;
+}
+
+.sys-title { font-size: 1.2rem; font-weight: 600; }
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.icon-btn svg { width: 24px; height: 24px; }
+.icon-btn:active { background: rgba(128,128,128,0.2); }
+
+.sys-grid {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 2px;
+    padding: 2px;
+    align-content: start;
+}
+
+.sys-grid::-webkit-scrollbar { width: 6px; }
+.sys-grid::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.3); border-radius: 3px; }
+
+.sys-item {
+    aspect-ratio: 1 / 1;
+    background: var(--btn-bg);
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+}
+
+.sys-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.sys-item img.loaded { opacity: 1; }
+
+/* System Gallery Overlay */
+.sys-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.sys-overlay.active-sys { 
+    opacity: 1; 
+    pointer-events: auto; 
+}
+
+.sys-overlay-header {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    width: 100%;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 21;
+}
+
+.premium-pill-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(30, 30, 30, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    padding: 10px 16px;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.premium-pill-btn svg { width: 18px; height: 18px; }
+
+.premium-pill-btn:active {
+    transform: scale(0.95);
+    background: rgba(50, 50, 50, 0.8);
+}
+
+.premium-pill-btn.danger {
+    padding: 10px;
+    color: #ff453a;
+}
+.premium-pill-btn.danger:active { background: rgba(255, 69, 58, 0.2); }
+
+.sys-overlay-content {
+    width: 100%; height: 100%;
+    display: flex; justify-content: center; align-items: center;
+}
+.sys-overlay-content img {
+    max-width: 100%; max-height: 100%;
+    object-fit: contain;
+    user-select: none;
+}
+
+.sys-nav {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    transform: translateY(-50%);
+    pointer-events: none;
+    z-index: 21;
+}
+
+.nav-btn {
+    pointer-events: auto;
+    background: rgba(0,0,0,0.5);
+    border: none; color: #fff;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex; justify-content: center; align-items: center;
+    backdrop-filter: blur(5px);
+}
+
+.hidden-module { display: none !important; }
+
+
+/* ==================== STRICT PIXEL RESPONSIVE RULES ==================== */
+/* For standard slim phones */
+@media (max-width: 400px) {
+    .calc-keypad { 
+        grid-auto-rows: 52px; /* Fixed pixel size for standard phones */
+        gap: 6px; 
+        padding: 12px; 
+        padding-bottom: max(16px, env(safe-area-inset-bottom)); 
+    }
+    .btn { font-size: 1rem; }
+    .num-btn { font-size: 1.3rem; }
+    .calc-display { font-size: 3.5rem; }
+    .sys-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+}
+
+/* For phones with short screens (so bottom never hides) */
+@media (max-height: 700px) {
+    .calc-keypad { 
+        grid-auto-rows: 48px; /* Safe fixed pixel size for short screens */
+    }
+    .calc-display { font-size: 3rem; }
+}
+
+@media (max-height: 600px) {
+    .calc-keypad { 
+        grid-auto-rows: 42px; /* Very safe fixed pixel size for tiny screens */
+        gap: 6px; 
+        padding: 8px;
+        padding-bottom: max(12px, env(safe-area-inset-bottom)); 
+    }
+    .calc-display-container { padding: 10px 16px; }
+    .calc-display { font-size: 2.5rem; }
+}
